@@ -6,3 +6,5 @@
 body {
   font-family: sans-serif;
 }
+
+ul > li.note { display: block; padding: 5px; }

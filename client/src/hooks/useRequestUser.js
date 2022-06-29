@@ -1,11 +1,12 @@
 import {useEffect, useState} from "react";
-import {Redirect} from "react-router-dom";
-import {render} from "react-dom";
+import Login from "../components/LoginPage";
+import {useHistory} from "react-router-dom";
 
 const useRequestUser = (type,OkText,KoText) => {
 
 	//useLogged
 	const [logText,setLogText] = useState(KoText);
+	const [token,setToken] = useState(localStorage.getItem('token'));
 	const [isLogged, setLogged] = useState(false);
 	const [errorMessage,setErrorMessage] = useState("");
 	const [formUsername,setFormUsername] = useState("");
@@ -18,37 +19,48 @@ const useRequestUser = (type,OkText,KoText) => {
 	const isUserLogged = function () {
 		return isLogged;
 	};
+	const history = useHistory();
 	useEffect(() => {
-		var res = JSON.parse(localStorage.getItem("isLogged"));
-		console.log(res);
-		setLogged(res);
-	})
-	useEffect(() => {
-
-		if(typeof isLogged !== 'undefined') {
-
-		}
-		else if(isLogged) {
-			console.log(isLogged);
-			console.log(logData);
-			setLogData(JSON.parse(localStorage.getItem("logData")));
+		if(token && token.length > 0) {
+			console.log("saving token");
+			localStorage.setItem("token",token);
+			history.push('/notes');
 		} else {
-			// render(
-			// 	<Redirect to="/"></Redirect>
-			// )
-			localStorage.setItem("isLogged", JSON.parse(false));
-			localStorage.removeItem("logData");
-			setLogData({
-				username : formUsername,
-				password : formPassword
-			});
-		}
 
-	}, [isLogged]);
+		}
+	},[token]);
+
+	// useEffect(() => {
+	// 	var res = JSON.parse(localStorage.getItem("isLogged"));
+	// 	console.log(res);
+	// 	setLogged(res);
+	// })
+	// useEffect(() => {
+	//
+	// 	if(typeof isLogged !== 'undefined') {
+	//
+	// 	}
+	// 	else if(isLogged) {
+	// 		console.log(isLogged);
+	// 		console.log(logData);
+	// 		setLogData(JSON.parse(localStorage.getItem("logData")));
+	// 	} else {
+	// 		// render(
+	// 		// 	<Redirect to="/"></Redirect>
+	// 		// )
+	// 		localStorage.setItem("isLogged", JSON.parse(false));
+	// 		localStorage.removeItem("logData");
+	// 		setLogData({
+	// 			username : formUsername,
+	// 			password : formPassword
+	// 		});
+	// 	}
+	//
+	// }, [isLogged]);
 
 	useEffect(() => {
 		setLogText(isLogged ? OkText : KoText)
-	},[isLogged]);
+	},[isLogged,token]);
 
 	const onChange = (key) => {
 
@@ -82,18 +94,23 @@ const useRequestUser = (type,OkText,KoText) => {
 				if(data.error) {
 					setErrorMessage(data.error);
 					setLogged(false);
-					localStorage.setItem("isLogged", JSON.stringify(false));
+					setToken('');
 				}else {
-					setLogData(data);
-					localStorage.setItem("logData", JSON.stringify(logData));
-					localStorage.setItem("isLogged", JSON.stringify(true));
-					setLogged(true);
+					setToken(data.token);
 				}
 				console.log('Success:', data);
 			})
 			.catch((error) => {
 				console.error('Error:', error);
 			});
+	}
+	const logginMandatori = () => {
+		return (
+			<>
+				<div>Es necesario loggarte</div>
+				<Login></Login>
+			</>
+		);
 	}
 	return {
 		value : logData,
@@ -103,7 +120,9 @@ const useRequestUser = (type,OkText,KoText) => {
 		setErrorMessage,
 		call,
 		onChange,
-		isLogged
+		isLogged,
+		token,
+		logginMandatori,
 	}
 
 }
