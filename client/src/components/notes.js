@@ -10,9 +10,11 @@ const Notes = () => {
 	const logUser = useRequestUser('login');
 	const [loading,setLoading] = useState(false);
 	const [notes,setNotes] = useState([]);
+	const [changes,setNoteChanges] = useState({});
 	const [numNotes,setNumNotes] = useState(0);
 	const [titulo,setTitulo] = useState('');
 	const [content,setContent] = useState('');
+	const [showMode,setShowMode] = useState('read');
 
 	const history = useHistory();
 
@@ -75,6 +77,26 @@ const Notes = () => {
 			.finally(() => setLoading(false));
 	}
 
+	const editarNota = function (id) {
+
+		return (e) => fetch("/api/notes/"+id,{
+			method : "PUT",
+			headers : {
+				'api-token' :  logUser.token,
+				'Content-Type': 'application/json'
+			},
+			body : JSON.stringify({
+				"title" : changes[id].title,
+				"content" : changes[id].content,
+			})
+		})
+			.then((res) => res.json())
+			.then(() => {
+				console.log("Nota borrada correctamente");
+				setNumNotes(numNotes-1)
+				setNoteChanges({})
+			});
+	}
 	const borrarNota = function (id) {
 		return (e) => fetch("/api/notes/"+id,{
 			method : "DELETE",
@@ -90,10 +112,32 @@ const Notes = () => {
 			});
 	};
 
-	const onChange =  (key) => {
+	const onChange =  (key,note) => {
 
 		return (e) => {
 			switch (key) {
+				case 'edit-content':
+					setNoteChanges({
+						...changes,
+						[note.id] : {
+
+							'title' : note.title,
+							...changes[note.id],
+							'content' : e.target.value
+						}
+					})
+					break;
+				case 'edit-title':
+
+					setNoteChanges({
+						...changes,
+						[note.id] : {
+							'content' : note.content,
+							...changes[note.id],
+							'title' : e.target.value
+						}
+					})
+					break;
 				case 'titulo':
 					setTitulo(e.target.value)
 					break;
@@ -106,28 +150,45 @@ const Notes = () => {
 		//setLogged(!isLogged);
 	}
 
+	const onClickToggleMode = function (e) {
+		setShowMode(showMode === 'read' ? 'edit' : 'read');
+	}
+
+
 
 	return (
 		<>
 			<h1>Notes</h1>
+			<button className={'button-edit'} onClick={onClickToggleMode}>{showMode === 'read' ? 'EditMode' : 'ReadMode'}</button>
 			<span className={errors.getSelectorClass()}>{errors.lastError}</span>
 			<ul className={'lista-de-notas'}>
 				{
 					notes.map((noteItem,index) => (
-						<li key={'note-'+index} className={'note'}>
-							<span>{noteItem.title}</span>
-							<span>{noteItem.content}</span>
-							<button onClick={borrarNota(noteItem.id)} ></button>
+						<li key={'note-'+index} className={'note'} >
+							{ showMode === 'read' ?
+								<>
+									<span className={'note-title'} >{noteItem.title}</span>
+									<span className={'note-content'} >{noteItem.content}</span>
+								</>
+								:
+								<>
+									<input className={'edit-title'} type={'text'} defaultValue={noteItem.title}   onChange={onChange('edit-title',noteItem)}  />
+									<input className={'edit-content'} type={'text'} defaultValue={noteItem.content}   onChange={onChange('edit-content',noteItem)}  />
+									<button onClick={editarNota(noteItem.id)} >Editar</button>
+								</>
+							}
+
+							<button onClick={borrarNota(noteItem.id)} >Eliminar</button>
 						</li>
 					))
 				}
+				<li className={'create-container'+' note'}>
+					<label>Titulo</label><input className={'create-input'} type={'text'} onChange={onChange('titulo')} />
+					<label>Contenido</label><input className={'create-input'} type={'text'} onChange={onChange('content')} />
+					<button onClick={onClickCreate}>Crear</button>
+				</li>
 			</ul>
-			<h2>Nueva nota</h2>
-			<label>Titulo</label><input className={'create-input'} type={'text'} onChange={onChange('titulo')} />
-			<label>Contenido</label><input className={'create-input'} type={'text'} onChange={onChange('content')} />
-			<button onClick={onClickCreate}>Crear</button>
-			<JsonPretty data={titulo}></JsonPretty>
-			<JsonPretty data={content}></JsonPretty>
+
 		</>
 	);
 };

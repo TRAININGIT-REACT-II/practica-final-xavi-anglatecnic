@@ -19,7 +19,6 @@ const App = () => {
                 <Route path="/register" ><Register/> </Route>
                 <Route path="/status" ><StatusPage/> </Route>
                 <Route path="/notes" ><Notes/> </Route>
-            <p>Footers</p>
         </main>
 
       </Router>

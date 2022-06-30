@@ -7,4 +7,8 @@ body {
   font-family: sans-serif;
 }
 
-ul > li.note { display: block; padding: 5px; }
+ul > li.note { display: block; padding: 5px; background: lightblue; border-radius: 5px; margin-bottom: 10px; }
+ul > li.note > .note-title { display: block; padding: 5px; font-weight: bold;  }
+ul > li.note > .note-content { display: block; padding: 5px; }
+ul > li.note > button { display: inline-block; vertical-align: top; border: 0; padding: 5px; background: blanchedalmond; color: black; border-radius: 10px; margin-right: 10px; min-width: 150px}
+ul > li.note > button:hover { background: darkorange; }
