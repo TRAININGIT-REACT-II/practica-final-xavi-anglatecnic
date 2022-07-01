@@ -3,6 +3,7 @@ import {useEffect, useRef, useState} from "react";
 import useManageError from "../hooks/useManageError";
 import {useHistory} from "react-router-dom";
 import JsonPretty from "./JsonPretty";
+import Modal from "./modal";
 
 
 const Notes = () => {
@@ -15,6 +16,7 @@ const Notes = () => {
 	const [titulo,setTitulo] = useState('');
 	const [content,setContent] = useState('');
 	const [showMode,setShowMode] = useState('read');
+	const [showModal,setShowModal] = useState('');
 
 	const history = useHistory();
 
@@ -66,6 +68,8 @@ const Notes = () => {
 			.then((data) => {
 				console.log(data);
 				if(!errors.fetchError(data)) {
+
+					setShowModal('create');
 					setNumNotes(data.id);
 					document.getElementsByClassName('create-input')[0].value = "";
 					document.getElementsByClassName('create-input')[1].value = "";
@@ -92,12 +96,14 @@ const Notes = () => {
 		})
 			.then((res) => res.json())
 			.then(() => {
+				setShowModal('edit');
 				console.log("Nota borrada correctamente");
 				setNumNotes(numNotes-1)
 				setNoteChanges({})
 			});
 	}
 	const borrarNota = function (id) {
+
 		return (e) => fetch("/api/notes/"+id,{
 			method : "DELETE",
 			headers : {
@@ -107,6 +113,8 @@ const Notes = () => {
 		})
 			.then((res) => res.json())
 			.then(() => {
+
+				setShowModal('delete');
 				console.log("Nota borrada correctamente");
 				setNumNotes(numNotes-1)
 			});
@@ -151,9 +159,16 @@ const Notes = () => {
 	}
 
 	const onClickToggleMode = function (e) {
+		setShowModal('change-view');
 		setShowMode(showMode === 'read' ? 'edit' : 'read');
 	}
 
+	const openModal =function () {
+
+	}
+	const closeModal = function () {
+		setShowModal('');
+	}
 
 
 	return (
@@ -175,10 +190,19 @@ const Notes = () => {
 									<input className={'edit-title'} type={'text'} defaultValue={noteItem.title}   onChange={onChange('edit-title',noteItem)}  />
 									<input className={'edit-content'} type={'text'} defaultValue={noteItem.content}   onChange={onChange('edit-content',noteItem)}  />
 									<button onClick={editarNota(noteItem.id)} >Editar</button>
+									<Modal show={showModal === 'edit'} onClose={closeModal}>
+										<h3>La nota ha sido actualizada correctamente</h3>
+									</Modal>
 								</>
 							}
 
 							<button onClick={borrarNota(noteItem.id)} >Eliminar</button>
+							<Modal show={showModal === 'delete'} onClose={closeModal}>
+								<h3>La nota ha sido borrada correctamente</h3>
+							</Modal>
+							<Modal show={showModal === 'change-view'} onClose={closeModal}>
+								<h3>El modo de lectura ha cambiado a: {showMode}</h3>
+							</Modal>
 						</li>
 					))
 				}
@@ -186,6 +210,9 @@ const Notes = () => {
 					<label>Titulo</label><input className={'create-input'} type={'text'} onChange={onChange('titulo')} />
 					<label>Contenido</label><input className={'create-input'} type={'text'} onChange={onChange('content')} />
 					<button onClick={onClickCreate}>Crear</button>
+					<Modal show={showModal === 'create'} onClose={closeModal}>
+						<h3>La nota ha sido creada correctamente y se ha insertado correctamente</h3>
+					</Modal>
 				</li>
 			</ul>
 

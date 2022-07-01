@@ -4,6 +4,7 @@ import NotesManager from "./components/NotesManager";
 import LoginPage from "./components/LoginPage";
 import Register from "./components/RegisterPage";
 import Notes from "./components/notes";
+import Modal from "./components/modal";
 
 
 // Componente principal de la aplicación.
@@ -19,6 +20,7 @@ const App = () => {
                 <Route path="/register" ><Register/> </Route>
                 <Route path="/status" ><StatusPage/> </Route>
                 <Route path="/notes" ><Notes/> </Route>
+
         </main>
 
       </Router>
