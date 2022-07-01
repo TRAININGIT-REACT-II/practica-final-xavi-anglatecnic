@@ -4,6 +4,7 @@ import useManageError from "../hooks/useManageError";
 import {useHistory} from "react-router-dom";
 import JsonPretty from "./JsonPretty";
 import Modal from "./modal";
+import ErrorBoundary from "./ErrorBoundary";
 
 
 const Notes = () => {
@@ -21,10 +22,12 @@ const Notes = () => {
 	const history = useHistory();
 
 	useEffect(() => {
+		console.log("Call");
 		if(!logUser.token) {
 			history.push('/login');
 			errors.setLastError("Usuario no logado");
 
+			return;
 		}
 		fetch("/api/notes",{
 			method : "GET",
@@ -173,6 +176,7 @@ const Notes = () => {
 
 	return (
 		<>
+			<ErrorBoundary message={"Algo ha ido mal en las notas"}>
 			<h1>Notes</h1>
 			<button className={'button-edit'} onClick={onClickToggleMode}>{showMode === 'read' ? 'EditMode' : 'ReadMode'}</button>
 			<span className={errors.getSelectorClass()}>{errors.lastError}</span>
@@ -187,8 +191,18 @@ const Notes = () => {
 								</>
 								:
 								<>
-									<input className={'edit-title'} type={'text'} defaultValue={noteItem.title}   onChange={onChange('edit-title',noteItem)}  />
-									<input className={'edit-content'} type={'text'} defaultValue={noteItem.content}   onChange={onChange('edit-content',noteItem)}  />
+									<div>
+										<div>
+											<label className={'minim-size'}>Título</label>
+											<input className={'edit-title'} type={'text'} defaultValue={noteItem.title}   onChange={onChange('edit-title',noteItem)}  />
+										</div>
+										<div>
+											<label className={'minim-size'}>Contenido</label>
+											<input className={'edit-content'} type={'text'} defaultValue={noteItem.content}   onChange={onChange('edit-content',noteItem)}  />
+										</div>
+									</div>
+
+
 									<button onClick={editarNota(noteItem.id)} >Editar</button>
 									<Modal show={showModal === 'edit'} onClose={closeModal}>
 										<h3>La nota ha sido actualizada correctamente</h3>
@@ -215,6 +229,7 @@ const Notes = () => {
 					</Modal>
 				</li>
 			</ul>
+			</ErrorBoundary>
 
 		</>
 	);

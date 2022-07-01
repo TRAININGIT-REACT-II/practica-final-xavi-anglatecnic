@@ -1,6 +1,7 @@
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import Login from "../components/LoginPage";
 import {useHistory} from "react-router-dom";
+import LoginPage from "../components/LoginPage";
 
 const useRequestUser = (type,OkText,KoText) => {
 
@@ -20,13 +21,14 @@ const useRequestUser = (type,OkText,KoText) => {
 		return isLogged;
 	};
 	const history = useHistory();
+
 	useEffect(() => {
 		if(token && token.length > 0) {
 			console.log("saving token");
 			localStorage.setItem("token",token);
-			history.push('/notes');
+			//history.push('/notes');
 		} else {
-
+			localStorage.removeItem('token');
 		}
 	},[token]);
 
@@ -67,10 +69,16 @@ const useRequestUser = (type,OkText,KoText) => {
 		return (e) => {
 			switch (key) {
 				case 'username':
-					setFormUsername(e.target.value)
+					setLogData({
+						...logData,
+						[key] : e.target.value
+					})
 					break;
 				case 'password':
-					setFormPassword(e.target.value)
+					setLogData({
+						...logData,
+						[key] : e.target.value
+					})
 					break;
 			}
 		}
@@ -97,6 +105,7 @@ const useRequestUser = (type,OkText,KoText) => {
 					setToken('');
 				}else {
 					setToken(data.token);
+					history.push('/notes');
 				}
 				console.log('Success:', data);
 			})
@@ -112,6 +121,10 @@ const useRequestUser = (type,OkText,KoText) => {
 			</>
 		);
 	}
+	const logout = () => {
+		setToken('');
+		window.location.reload();
+	}
 	return {
 		value : logData,
 		error: errorMessage,
@@ -122,7 +135,9 @@ const useRequestUser = (type,OkText,KoText) => {
 		onChange,
 		isLogged,
 		token,
+		setToken,
 		logginMandatori,
+		logout
 	}
 
 }
